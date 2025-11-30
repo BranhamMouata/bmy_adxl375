@@ -3,7 +3,7 @@
 
 namespace bmy::adxl375 {
 inline constexpr uint32_t kClkSpeed = 5000000; // 5MHz
-inline constexpr uint8_t kChipSelectPin = PIN_SPI_SS;
+inline constexpr uint8_t kChipSelectPin = 10;
 inline constexpr uint8_t kHeaderBits = 8;
 inline constexpr uint8_t kFifoPopDelayUs = 5; // us
 // data rate
