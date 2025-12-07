@@ -7,7 +7,7 @@ The ADXL375 is a digital accelerometer that supports both SPI and I2C mode. It h
 
 More information on the ADXL375 can be found in the datasheet: http://www.analog.com/static/imported-files/data_sheets/ADXL375.pdf
 ## Driver operation
-Because the ADXL375 with I2C mode is limited to 800 Hz, the BMY ADXL375 driver uses 4 wires SPI mode (mode 3) to anable higher data rates (up to 3200 Hz). When instantiated, SPI, wire, timer and interrupt handlers must be provided in the constructor. Then to initialize measurements, chip select pin, interrupt pin, data rate, and SPI clock rate must be provided in init function. I
+Because the ADXL375 with I2C mode is limited to 800 Hz, the BMY ADXL375 driver uses 4 wires SPI mode (mode 3) to anable higher data rates (up to 3200 Hz). When instantiated, SPI, wire, timer and interrupt handlers must be provided in the constructor. Then to initialize measurements, chip select pin, interrupt pin, data rate, and SPI clock rate must be provided in init function.
 
 ### SPI implementation
 The user must provide a SPI implementation to handle SPI communication.                                                                                                                                                                     
@@ -26,7 +26,7 @@ The WIRE class must implement:
 - void write(uint8_t pin, wire::PinStatus status): to do a digital write to the corresponding pin.
 - wire::PinStatus read(uint8_t pin): read the value of the pin.
 
-If the user SPI API doesnt provide these implementations, an adapter can be used.
+If the user Wire API doesnt provide these implementations, an adapter can be used.
 
 ### Timer implementation
 The user must provide a TIMER implementation to handle delay.                                                                                                                                                                            
@@ -34,13 +34,13 @@ The TIMER class must implement:
 - void delay_ms(uint32_t t): delay milliseconds.
 - void delay_us(uint32_t t)
 
-If the user SPI API doesnt provide these implementations, an adapter can be used.
+If the user Timer API doesnt provide these implementations, an adapter can be used.
 
 ### Interrupt implementation
 The user must provide an INTERRUPT implementation to handle interrupts.                                                                                                                                                                     
 The INTERRUPT must implement:
 - void attachInterrupt(uint8_t interruptNum, void (*)(void *) userFunc, wire::PinStatus mode, void *param)
 
-If the user SPI API doesnt provide these implementations, an adapter can be used.
+If the user Interrupt API doesnt provide these implementations, an adapter can be used.
 
   
