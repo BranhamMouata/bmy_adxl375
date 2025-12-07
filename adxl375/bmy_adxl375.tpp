@@ -95,10 +95,11 @@ template <spi_com SPI_COM, wire_handler WIRE, time_handler TIMER, interrupt_hand
  * @brief Initialize the accelerometer: configure CS pin, data rate, format,
  * calibrate and enable FIFO and interrupts.
  */
-void Adxl375<SPI_COM, WIRE, TIMER, INTERRUPT>::init(uint8_t chip_select, uint16_t data_rate,
-                                                    uint8_t interrupt_pin) {
+void Adxl375<SPI_COM, WIRE, TIMER, INTERRUPT>::init(uint8_t chip_select, uint8_t interrupt_pin,
+                                                    uint32_t clock_speed, uint16_t data_rate) {
   //------- Init the device
   chip_select_ = chip_select;
+  clock_speed_ = clock_speed;
   data_rate_ = data_rate;
   wire_->mode(chip_select_, wire::PinMode::OUTPUT);
   // deselect device
@@ -142,7 +143,7 @@ template <spi_com SPI_COM, wire_handler WIRE, time_handler TIMER, interrupt_hand
 void Adxl375<SPI_COM, WIRE, TIMER, INTERRUPT>::read(uint8_t addr, uint8_t size,
                                                     uint8_t *ret_data) const {
   const bool multiple_bytes = size > 1;
-  spi_->beginTransaction(adxl375::kClkSpeed, spi::BitOrder::MSBFIRST, spi::Mode::SPI_MODE3);
+  spi_->beginTransaction(clock_speed_, spi::BitOrder::MSBFIRST, spi::Mode::SPI_MODE3);
   wire_->write(chip_select_, wire::PinStatus::LOW);
   // format the header (read command with multi-byte flag)
   uint8_t header = 0x80;
@@ -163,7 +164,7 @@ template <spi_com SPI_COM, wire_handler WIRE, time_handler TIMER, interrupt_hand
  */
 uint8_t Adxl375<SPI_COM, WIRE, TIMER, INTERRUPT>::read_byte(uint8_t addr) const {
   constexpr bool multiple_bytes = false;
-  spi_->beginTransaction(adxl375::kClkSpeed, spi::BitOrder::MSBFIRST, spi::Mode::SPI_MODE3);
+  spi_->beginTransaction(clock_speed_, spi::BitOrder::MSBFIRST, spi::Mode::SPI_MODE3);
   wire_->write(chip_select_, wire::PinStatus::LOW);
   // format the header and the first data
   uint8_t header = 0x80 | (multiple_bytes << 6);
@@ -184,7 +185,7 @@ template <spi_com SPI_COM, wire_handler WIRE, time_handler TIMER, interrupt_hand
 void Adxl375<SPI_COM, WIRE, TIMER, INTERRUPT>::write(uint8_t addr, uint8_t *data,
                                                      uint8_t size) const {
   const bool multiple_bytes = size > 1;
-  spi_->beginTransaction(adxl375::kClkSpeed, spi::BitOrder::MSBFIRST, spi::Mode::SPI_MODE3);
+  spi_->beginTransaction(clock_speed_, spi::BitOrder::MSBFIRST, spi::Mode::SPI_MODE3);
   wire_->write(chip_select_, wire::PinStatus::LOW);
   // format the header
   uint8_t header = (multiple_bytes << 6);
@@ -203,7 +204,7 @@ template <spi_com SPI_COM, wire_handler WIRE, time_handler TIMER, interrupt_hand
  */
 void Adxl375<SPI_COM, WIRE, TIMER, INTERRUPT>::write_byte(uint8_t addr, uint8_t data) const {
   constexpr bool multiple_bytes = false;
-  spi_->beginTransaction(adxl375::kClkSpeed, spi::BitOrder::MSBFIRST, spi::Mode::SPI_MODE3);
+  spi_->beginTransaction(clock_speed_, spi::BitOrder::MSBFIRST, spi::Mode::SPI_MODE3);
   wire_->write(chip_select_, wire::PinStatus::LOW);
   // format header
   uint8_t header = (multiple_bytes << 6);

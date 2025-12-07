@@ -62,10 +62,10 @@ public:
    * the interrupt handler on `interrupt_pin`.
    *
    * @param chip_select GPIO pin used as chip-select for SPI transactions.
-   * @param data_rate   Desired sensor data rate (device-specific units).
    * @param interrupt_pin GPIO pin number used to receive data-ready interrupts.
+   * @param data_rate   Desired sensor data rate (device-specific units).
    */
-  void init(uint8_t chip_select, uint16_t data_rate, uint8_t interrupt_pin);
+  void init(uint8_t chip_select, uint8_t interrupt_pin, uint32_t clock_speed, uint16_t data_rate);
 
   /**
    * @brief Read the device ID register.
@@ -172,6 +172,7 @@ private:
 private:
   acc::RawData fifo_[adxl375::kFifoSize]{};
   acc::Data offset_{};
+  uint32_t clock_speed_;
   uint16_t data_rate_;
   uint8_t data_number_{};
   uint8_t chip_select_;
