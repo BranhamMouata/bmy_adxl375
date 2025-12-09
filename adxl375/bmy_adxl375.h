@@ -2,12 +2,13 @@
 #include "acc_data.h"
 #include "adxl375_params.h"
 #include "interrupt_concept.h"
+#include "iohandler_concept.h"
 #include "spi_concept.h"
 #include "timer_concept.h"
-#include "wire_concept.h"
 namespace bmy {
 // This class is a wrapper only for testing purpose
-template <spi_com SPI_COM, wire_handler WIRE, time_handler TIMER, interrupt_handler INTERRUPT>
+template <spi_com SPI_COM, iohandler_concept IOHANDLER, time_handler TIMER,
+          interrupt_handler INTERRUPT>
 class Adxl375Test;
 
 /**
@@ -17,7 +18,7 @@ class Adxl375Test;
  * platform-specific SPI and GPIO/time/interrupt helpers.
  *
  * @tparam SPI_COM   SPI implementation type satisfying the `spi_com` concept.
- * @tparam WIRE      GPIO/wire helper type satisfying the `wire_handler` concept.
+ * @tparam IOHANDLER      GPIO helper type satisfying the `iohandler_concept` concept.
  * @tparam TIMER     Timer/delay helper satisfying the `time_handler` concept.
  * @tparam INTERRUPT Interrupt controller helper satisfying the `interrupt_handler` concept.
  *
@@ -33,17 +34,18 @@ class Adxl375Test;
  * FIFO. Private helpers handle low-level register access, calibration and ISR
  * handling.
  */
-template <spi_com SPI_COM, wire_handler WIRE, time_handler TIMER, interrupt_handler INTERRUPT>
+template <spi_com SPI_COM, iohandler_concept IOHANDLER, time_handler TIMER,
+          interrupt_handler INTERRUPT>
 class Adxl375 {
-  friend Adxl375Test<SPI_COM, WIRE, TIMER, INTERRUPT>;
+  friend Adxl375Test<SPI_COM, IOHANDLER, TIMER, INTERRUPT>;
 
 public:
   using SPI_TYPE = SPI_COM;
-  using WIRE_TYPE = WIRE;
+  using IOHANDLER_TYPE = IOHANDLER;
   using TIMER_TYPE = TIMER;
   using INTERRUPT_TYPE = INTERRUPT;
 
-  Adxl375(SPI_COM *spi, WIRE *wire, TIMER *timer, INTERRUPT *interrupt)
+  Adxl375(SPI_COM *spi, IOHANDLER *wire, TIMER *timer, INTERRUPT *interrupt)
       : spi_(spi), wire_(wire), timer_(timer), interrupt_(interrupt) {}
   Adxl375(const Adxl375 &) = delete;
   Adxl375(Adxl375 &&) noexcept = delete;
@@ -178,7 +180,7 @@ private:
   uint8_t chip_select_;
   bool new_data_{false};
   SPI_COM *spi_;
-  WIRE *wire_;
+  IOHANDLER *wire_;
   TIMER *timer_;
   INTERRUPT *interrupt_;
 };

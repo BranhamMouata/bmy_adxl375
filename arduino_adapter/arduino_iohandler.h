@@ -1,5 +1,5 @@
 #pragma once
-#include "wire_concept.h"
+#include "iohandler_concept.h"
 #include <Arduino.h>
 
 namespace bmy {
@@ -53,9 +53,9 @@ constexpr wire::PinStatus bmy_pin_status_converter(PinStatus status) {
   }
 }
 
-class ArduinoWireAdapter {
+class ArduinoIoHandlerAdapter {
 public:
-  ArduinoWireAdapter() = default;
+  ArduinoIoHandlerAdapter() = default;
   void mode(uint8_t pin, wire::PinMode mode) { pinMode(pin, arduino_pin_mode_converter(mode)); }
   void write(uint8_t pin, wire::PinStatus status) {
     digitalWrite(pin, arduino_pin_status_converter(status));
