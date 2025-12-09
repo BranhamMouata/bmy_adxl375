@@ -1,7 +1,7 @@
 #pragma once
-#include "arduino_wire.h"
+#include "arduino_iohandler.h"
 #include "interrupt_concept.h"
-#include "wire_concept.h"
+#include "iohandler_concept.h"
 #include <Arduino.h>
 
 namespace bmy {
