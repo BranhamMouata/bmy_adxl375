@@ -24,9 +24,8 @@ class Adxl375Test;
  *
  * Example:
  * @code{.cpp}
- * bmy::Adxl375<SpiImpl, WireImpl, TimerImpl, InterruptImpl> accel(&spi, &wire, &timer, &irq);
- * accel.init(CHIP_SELECT_PIN, 400, INTERRUPT_PIN);
- * auto measurements = accel.data();
+ * bmy::Adxl375<SpiImpl, IohandlerImpl, TimerImpl, InterruptImpl> accel(&spi, &iohandler, &timer,
+ * &irq); accel.init(CHIP_SELECT_PIN, 400, INTERRUPT_PIN); auto measurements = accel.data();
  * @endcode
  *
  * The class exposes initialization, device id readout and helpers to read
@@ -45,8 +44,8 @@ public:
   using TIMER_TYPE = TIMER;
   using INTERRUPT_TYPE = INTERRUPT;
 
-  Adxl375(SPI_COM *spi, IOHANDLER *wire, TIMER *timer, INTERRUPT *interrupt)
-      : spi_(spi), wire_(wire), timer_(timer), interrupt_(interrupt) {}
+  Adxl375(SPI_COM *spi, IOHANDLER *iohandler, TIMER *timer, INTERRUPT *interrupt)
+      : spi_(spi), iohandler_(iohandler), timer_(timer), interrupt_(interrupt) {}
   Adxl375(const Adxl375 &) = delete;
   Adxl375(Adxl375 &&) noexcept = delete;
   Adxl375 &operator=(const Adxl375 &) = delete;
@@ -80,35 +79,41 @@ public:
    *
    * Currently a no-op placeholder — concrete cleanup can be added as needed.
    */
-  void close() {}
+  void close();
 
   /**
    * @brief Return the last processed accelerometer sample as `acc::Data`.
    * @return Processed sensor sample (physical units applied where appropriate).
    */
-  acc::Data data() const;
+  acc::Data data();
 
   /**
    * @brief Return the latest raw FIFO sample(s) as `acc::RawData`.
    * @return Raw sensor bytes/values as read from the device.
    */
-  const acc::RawData *raw_data();
+  acc::RawData *raw_data();
 
   /**
    * @brief Return current FIFO fill level (number of samples stored).
    * @return FIFO size in samples (0..kFifoSize).
    */
-  uint8_t data_count() const { return data_number_; }
+  uint8_t data_count() const { return data_count_; }
 
   /**
    * @brief Return true if new data has been read into the FIFO since last call.
    * @return true if new data is available.
    */
-  bool new_data() const { return new_data_; }
+  bool data_ready() const { return data_ready_; }
+
+  /**
+   * @brief Return the configured data rate.
+   * @return Data rate configured for the device.
+   */
+  uint16_t data_rate() const { return adxl375::DATA_RATE(data_rate_); }
 
 protected:
   Adxl375() = default;
-  // The calibration should be done before setting the fifo
+
 private:
   /**
    * @brief Perform sensor calibration (offset computation) before enabling FIFO.
@@ -138,7 +143,7 @@ private:
    * @brief Configure and attach the interrupt for data-ready/FIFO events.
    * @param interrupt_pin GPIO pin used for the interrupt.
    */
-  void init_interupt(uint8_t interrupt_pin);
+  void init_interupt();
 
   /**
    * @brief Low-level read of `size` bytes starting from device register `addr`.
@@ -146,7 +151,7 @@ private:
    * @param size Number of bytes to read.
    * @param ret_data Pointer to output buffer (must have `size` capacity).
    */
-  void read(uint8_t addr, uint8_t size, uint8_t *ret_data) const;
+  void read(uint8_t addr, uint8_t size, volatile uint8_t *ret_data) const;
 
   /**
    * @brief Read a single register byte.
@@ -158,7 +163,7 @@ private:
   /**
    * @brief Low-level write of `size` bytes to device register `addr`.
    */
-  void write(uint8_t addr, uint8_t *data, uint8_t size) const;
+  void write(uint8_t addr, volatile uint8_t *data, uint8_t size) const;
 
   /**
    * @brief Write a single byte to register `addr`.
@@ -169,20 +174,28 @@ private:
    * @brief ISR helper called when an interrupt indicates FIFO data is ready.
    * @param adxl375 Pointer to the driver instance (passed through the IRQ attach).
    */
-  static void isr_read_fifo(void *adxl375);
+  static void isr_read_fifo();
+
+  /**
+   * @brief Update the FIFO with new data.
+   * @return void.
+   */
+  void update_fifo();
 
 private:
   acc::RawData fifo_[adxl375::kFifoSize]{};
   acc::Data offset_{};
   uint32_t clock_speed_;
   uint16_t data_rate_;
-  uint8_t data_number_{};
+  uint8_t data_count_{};
   uint8_t chip_select_;
-  bool new_data_{false};
+  uint8_t interrupt_pin_;
+  volatile bool data_ready_{false};
   SPI_COM *spi_;
-  IOHANDLER *wire_;
+  IOHANDLER *iohandler_;
   TIMER *timer_;
   INTERRUPT *interrupt_;
+  static inline Adxl375<SPI_COM, IOHANDLER, TIMER, INTERRUPT> *isr_caller_ = nullptr;
 };
 } // namespace bmy
 #include "bmy_adxl375.tpp"

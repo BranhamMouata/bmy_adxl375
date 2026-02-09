@@ -11,10 +11,30 @@ public:
   ArduinoInterruptAdapter(const ArduinoInterruptAdapter &) = delete;
   ArduinoInterruptAdapter(ArduinoInterruptAdapter &&) = delete;
   ~ArduinoInterruptAdapter() = default;
-  void attachInterrupt(uint8_t interruptNum, bmy::voidFuncPtrParam userFunc, wire::PinStatus mode,
-                       void *param) {
-    arduino::attachInterrupt<void>(interruptNum, userFunc, arduino_pin_status_converter(mode),
-                                   param);
+  void attachGpioInterrupt(uint8_t interruptNum, bmy::voidFuncPtr userFunc,
+                           iohandler::PinStatus mode) {
+    attachInterrupt(interruptNum, userFunc, arduino_pin_status_converter(mode));
   }
+  void detachGpioInterrupt(uint8_t interruptNum) { detachInterrupt(interruptNum); }
+  void enableInterrupt(bool status) {
+    // if interrupt is already enabled or the previous disabling status is false, do nothing
+    if (!status) {
+      return;
+    }
+    interrupt_enabled_ = true;
+    interrupts();
+  }
+
+  bool disableInterrupt() {
+    if (!interrupt_enabled_) {
+      return false;
+    }
+    interrupt_enabled_ = false;
+    noInterrupts();
+    return true;
+  }
+
+private:
+  bool interrupt_enabled_{true};
 };
 } // namespace bmy

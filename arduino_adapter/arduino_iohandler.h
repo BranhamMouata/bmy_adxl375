@@ -3,63 +3,65 @@
 #include <Arduino.h>
 
 namespace bmy {
-constexpr PinMode arduino_pin_mode_converter(wire::PinMode mode) {
+constexpr PinMode arduino_pin_mode_converter(iohandler::PinMode mode) {
   switch (mode) {
-  case wire::PinMode::INPUT:
+  case iohandler::PinMode::INPUT:
     return INPUT;
-  case wire::PinMode::OUTPUT:
+  case iohandler::PinMode::OUTPUT:
     return OUTPUT;
-  case wire::PinMode::INPUT_PULLUP:
+  case iohandler::PinMode::INPUT_PULLUP:
     return INPUT_PULLUP;
-  case wire::PinMode::INPUT_PULLDOWN:
+  case iohandler::PinMode::INPUT_PULLDOWN:
     return INPUT_PULLDOWN;
-  case wire::PinMode::OUTPUT_OPENDRAIN:
+  case iohandler::PinMode::OUTPUT_OPENDRAIN:
     return OUTPUT_OPENDRAIN;
   default:
     return INPUT;
   }
 }
-constexpr PinStatus arduino_pin_status_converter(wire::PinStatus status) {
+constexpr PinStatus arduino_pin_status_converter(iohandler::PinStatus status) {
   switch (status) {
-  case wire::PinStatus::LOW:
+  case iohandler::PinStatus::LOW:
     return LOW;
-  case wire::PinStatus::HIGH:
+  case iohandler::PinStatus::HIGH:
     return HIGH;
-  case wire::PinStatus::CHANGE:
+  case iohandler::PinStatus::CHANGE:
     return CHANGE;
-  case wire::PinStatus::FALLING:
+  case iohandler::PinStatus::FALLING:
     return FALLING;
-  case wire::PinStatus::RISING:
+  case iohandler::PinStatus::RISING:
     return RISING;
   default:
     return LOW;
   }
 }
 
-constexpr wire::PinStatus bmy_pin_status_converter(PinStatus status) {
+constexpr iohandler::PinStatus bmy_pin_status_converter(PinStatus status) {
   switch (status) {
   case LOW:
-    return wire::PinStatus::LOW;
+    return iohandler::PinStatus::LOW;
   case HIGH:
-    return wire::PinStatus::HIGH;
+    return iohandler::PinStatus::HIGH;
   case CHANGE:
-    return wire::PinStatus::CHANGE;
+    return iohandler::PinStatus::CHANGE;
   case FALLING:
-    return wire::PinStatus::FALLING;
+    return iohandler::PinStatus::FALLING;
   case RISING:
-    return wire::PinStatus::RISING;
+    return iohandler::PinStatus::RISING;
   default:
-    return wire::PinStatus::LOW;
+    return iohandler::PinStatus::LOW;
   }
 }
 
 class ArduinoIoHandlerAdapter {
 public:
   ArduinoIoHandlerAdapter() = default;
-  void mode(uint8_t pin, wire::PinMode mode) { pinMode(pin, arduino_pin_mode_converter(mode)); }
-  void write(uint8_t pin, wire::PinStatus status) {
+  void mode(uint8_t pin, iohandler::PinMode mode) {
+    pinMode(pin, arduino_pin_mode_converter(mode));
+  }
+  void write(uint8_t pin, iohandler::PinStatus status) {
     digitalWrite(pin, arduino_pin_status_converter(status));
   }
-  wire::PinStatus read(uint8_t pin) { return bmy_pin_status_converter(digitalRead(pin)); }
+  iohandler::PinStatus read(uint8_t pin) { return bmy_pin_status_converter(digitalRead(pin)); }
 };
 } // namespace bmy

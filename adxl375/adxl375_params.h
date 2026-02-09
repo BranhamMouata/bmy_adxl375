@@ -19,11 +19,23 @@ inline constexpr uint8_t ODR_CODE(const uint16_t freq) {
     return 0x0A;
   }
 }
+inline constexpr uint16_t DATA_RATE(const uint16_t freq) {
+  switch (freq) {
+  case 800:
+    return freq;
+  case 1600:
+    return freq;
+  case 3200:
+    return freq;
+  default:
+    return 100;
+  }
+}
 // Fifo mode
 enum class FifoMode { kByPass = 0x0, kFifo, kStream, kTrigger };
 // Fifo interupt pin
 inline constexpr uint8_t kInterPin = 0X2;
-inline constexpr auto kDataRate = 3200; // output data rate
+inline constexpr auto kDataRate = 800; // output data rate
 inline constexpr auto kDataFormat = 0X0B;
 // The scale of the acceleration read in the data register
 inline constexpr float kDataScale = 0.049;      // g/LSB
